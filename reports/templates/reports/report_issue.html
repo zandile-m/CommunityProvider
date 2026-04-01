@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommunityProvider | Report Issue</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+        nav {
+            background: #1a3c5e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        nav .logo { color: white; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+        nav .logo span { color: #f39c12; }
+        nav a { color: #ccc; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        nav a:hover { color: white; }
+
+        .hero {
+            background: linear-gradient(135deg, #1a3c5e, #2980b9);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .hero h1 { font-size: 28px; margin-bottom: 8px; }
+        .hero p { font-size: 15px; opacity: 0.85; }
+
+        .container { max-width: 620px; margin: 40px auto; padding: 0 20px; }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .card h2 { color: #1a3c5e; margin-bottom: 25px; font-size: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 12px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; color: #333; margin-bottom: 6px; font-size: 14px; }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            transition: border 0.3s;
+            background: #fafafa;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2980b9;
+            background: white;
+        }
+
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .issue-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .issue-type-btn {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        .issue-type-btn:hover { border-color: #2980b9; color: #2980b9; background: #eaf4fb; }
+        .issue-type-btn.selected { border-color: #1a3c5e; background: #1a3c5e; color: white; }
+        .issue-type-btn .icon { font-size: 22px; display: block; margin-bottom: 5px; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1a3c5e, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        .track-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .track-link a { color: #2980b9; text-decoration: none; font-weight: 600; }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Community<span>Provider</span></div>
+    <div>
+        <a href="/report/">Report Issue</a>
+        <a href="/track/">Track Issues</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Report a Service Delivery Issue</h1>
+    <p>Help improve your community by reporting problems</p>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>📋 Issue Details</h2>
+        {% if success %}
+<div style="background:#eafaf1; border-left: 5px solid #27ae60; padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #27ae60; font-weight: 600;">
+    ✅ Your issue has been successfully reported! You can track it below.
+    <a href="/track/" style="color:#1a3c5e; margin-left: 10px;">View Tracking →</a>
+</div>
+{% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="issue_type" id="issue_type_input" value="Pothole">
+
+            <div class="form-group">
+                <label>Select Issue Type</label>
+                <div class="issue-types">
+                    <div class="issue-type-btn selected" onclick="selectType(this, 'Pothole')">
+                        <span class="icon">🕳️</span> Pothole
+                    </div>
+                    <div class="issue-type-btn" onclick="selectType(this, 'Water Leak')">
+                        <span class="icon">💧</span> Water Leak
+                    </div>
+                    <div class="issue-type-btn" onclick="selectType(this, 'Electricity Fault')">
+                        <span class="icon">⚡</span> Electricity Fault
+                    </div>
+                    <div class="issue-type-btn" onclick="selectType(this, 'Waste Collection')">
+                        <span class="icon">🗑️</span> Waste Collection
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>📍 Location</label>
+                <input type="text" name="location" placeholder="e.g. Soshanguve Block H, Main Street" required>
+            </div>
+
+            <div class="form-group">
+                <label>📝 Description</label>
+                <textarea name="description" placeholder="Describe the issue in detail..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>👤 Your Name <span style="color:#aaa;font-weight:400">(Optional)</span></label>
+                <input type="text" name="name" placeholder="Enter your name">
+            </div>
+
+            <button type="submit" class="btn-submit">🚀 Submit Report</button>
+        </form>
+    </div>
+
+    <div class="track-link">
+        Already reported something? <a href="/track/">Track your issue →</a>
+    </div>
+</div>
+
+<footer>CommunityProvider &copy; 2026 | Soshanguve Service Delivery System</footer>
+
+<script>
+    function selectType(el, value) {
+        document.querySelectorAll('.issue-type-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('issue_type_input').value = value;
+    }
+</script>
+
+</body>
+</html>

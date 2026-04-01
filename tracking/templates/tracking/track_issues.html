@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CommunityProvider | Track Issues</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+        nav {
+            background: #1a3c5e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        nav .logo { color: white; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+        nav .logo span { color: #f39c12; }
+        nav a { color: #ccc; text-decoration: none; margin-left: 20px; font-size: 14px; }
+        nav a:hover { color: white; }
+
+        .hero {
+            background: linear-gradient(135deg, #1a3c5e, #2980b9);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .hero h1 { font-size: 28px; margin-bottom: 8px; }
+        .hero p { font-size: 15px; opacity: 0.85; }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 12px 25px;
+            text-align: center;
+        }
+        .stat-box .number { font-size: 26px; font-weight: 700; }
+        .stat-box .label { font-size: 12px; opacity: 0.85; }
+
+        .container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active { background: #1a3c5e; color: white; border-color: #1a3c5e; }
+
+        .issue-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            border-left: 5px solid #2980b9;
+            transition: transform 0.2s;
+        }
+        .issue-card:hover { transform: translateY(-2px); }
+        .issue-card.Pending { border-left-color: #e67e22; }
+        .issue-card.Resolved { border-left-color: #27ae60; }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .issue-title { font-size: 16px; font-weight: 700; color: #1a3c5e; }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-Pending { background: #fef3e2; color: #e67e22; }
+        .badge-In-Progress { background: #eaf4fb; color: #2980b9; }
+        .badge-Resolved { background: #eafaf1; color: #27ae60; }
+
+        .card-body { font-size: 14px; color: #555; line-height: 1.7; }
+        .card-body span { font-weight: 600; color: #333; }
+
+        .card-footer {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .no-issues {
+            text-align: center;
+            padding: 60px 20px;
+            color: #aaa;
+            background: white;
+            border-radius: 12px;
+        }
+        .no-issues .icon { font-size: 50px; margin-bottom: 15px; }
+
+        .report-btn {
+            display: block;
+            text-align: center;
+            background: linear-gradient(135deg, #1a3c5e, #2980b9);
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+        .report-btn:hover { opacity: 0.9; }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">Community<span>Provider</span></div>
+    <div>
+        <a href="/report/">Report Issue</a>
+        <a href="/track/">Track Issues</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>📍 Track Reported Issues</h1>
+    <p>Monitor the status of service delivery issues in Soshanguve</p>
+    <div class="stats">
+        <div class="stat-box">
+            <div class="number">{{ issues.count }}</div>
+            <div class="label">Total Issues</div>
+        </div>
+        <div class="stat-box">
+            <div class="number">{{ pending_count }}</div>
+            <div class="label">Pending</div>
+        </div>
+        <div class="stat-box">
+            <div class="number">{{ resolved_count }}</div>
+            <div class="label">Resolved</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="filter-bar">
+    <a href="/track/?filter=All" class="filter-btn {% if filter_type == 'All' %}active{% endif %}">All</a>
+    <a href="/track/?filter=Pothole" class="filter-btn {% if filter_type == 'Pothole' %}active{% endif %}">🕳️ Pothole</a>
+    <a href="/track/?filter=Water Leak" class="filter-btn {% if filter_type == 'Water Leak' %}active{% endif %}">💧 Water Leak</a>
+    <a href="/track/?filter=Electricity Fault" class="filter-btn {% if filter_type == 'Electricity Fault' %}active{% endif %}">⚡ Electricity Fault</a>
+    <a href="/track/?filter=Waste Collection" class="filter-btn {% if filter_type == 'Waste Collection' %}active{% endif %}">🗑️ Waste Collection</a>
+</div>
+
+    {% if issues %}
+        {% for issue in issues %}
+        <div class="issue-card {{ issue.status|cut:' ' }}">
+            <div class="card-header">
+                <div class="issue-title">
+                    {% if issue.issue_type == "Pothole" %}🕳️
+                    {% elif issue.issue_type == "Water Leak" %}💧
+                    {% elif issue.issue_type == "Electricity Fault" %}⚡
+                    {% else %}🗑️{% endif %}
+                    {{ issue.issue_type }}
+                </div>
+                <span class="status-badge badge-{{ issue.status|cut:' ' }}">{{ issue.status }}</span>
+            </div>
+            <div class="card-body">
+                <p>📍 <span>Location:</span> {{ issue.location }}</p>
+                <p>📝 <span>Description:</span> {{ issue.description }}</p>
+                <p>👤 <span>Reported by:</span> {{ issue.name|default:"Anonymous" }}</p>
+            </div>
+            <div class="card-footer">
+                <span>🕐 {{ issue.date_reported|date:"d M Y, H:i" }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-issues">
+            <div class="icon">📭</div>
+            <p>No issues reported yet.</p>
+        </div>
+    {% endif %}
+
+    <a href="/report/" class="report-btn">+ Report a New Issue</a>
+</div>
+
+<footer>CommunityProvider &copy; 2026 | Soshanguve Service Delivery System</footer>
+
+</body>
+</html>
